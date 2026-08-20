@@ -1,5 +1,6 @@
 services:
   koito:
+    build: .
     image: gabehf/koito:latest
     container_name: koito
     restart: unless-stopped
