@@ -1,0 +1,32 @@
+services:
+  koito:
+    image: gabehf/koito:latest
+    container_name: koito
+    restart: unless-stopped
+    ports:
+      - "4110:4110"
+    volumes:
+      # Config directory: stores the SQLite database, image caches and the
+      # import folder. Map this to a persistent path on your host.
+      - ./koito:/etc/koito
+    environment:
+      - TZ=${TZ:-Etc/UTC}
+      # - KOITO_LOG_LEVEL=info
+      # - KOITO_ENABLE_STRUCTURED_LOGGING=false
+      # - KOITO_DEFAULT_USERNAME=admin
+      # - KOITO_DEFAULT_PASSWORD=changeme
+      # - KOITO_DEFAULT_THEME=yuu
+      # - KOITO_LOGIN_GATE=false
+      # - KOITO_SKIP_IMPORT=false
+      # - KOITO_DISABLE_RATE_LIMIT=false
+      # - KOITO_FORCE_TZ=Etc/UTC
+      # - KOITO_DISABLE_DEEZER=false
+      # - KOITO_DISABLE_COVER_ART_ARCHIVE=false
+      # - KOITO_DISABLE_MUSICBRAINZ=false
+      # - KOITO_SUBSONIC_URL=https://navidrome.mydomain.com
+      # - KOITO_SUBSONIC_PARAMS=u=XXX&t=XXX&s=XXX
+      # - KOITO_LASTFM_API_KEY=
+      # - KOITO_ENABLE_LBZ_RELAY=false
+      # - KOITO_LBZ_RELAY_URL=
+      # - KOITO_LBZ_RELAY_TOKEN=
+      # - KOITO_CORS_ALLOWED_ORIGINS=
