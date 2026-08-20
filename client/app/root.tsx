@@ -138,7 +138,7 @@ export function ErrorBoundary() {
     stack = error.stack;
   }
 
-  const title = `${message} - Koito`;
+  const title = `${message} - my music`;
 
   return (
     <AppProvider>
