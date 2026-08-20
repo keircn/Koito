@@ -41,8 +41,9 @@ var (
 	fontOnce sync.Once
 	fontErr  error
 
-	valueFace font.Face
-	labelFace font.Face
+	valueFace  font.Face
+	labelFace  font.Face
+	footerFace font.Face
 )
 
 func loadFonts() {
@@ -63,6 +64,11 @@ func loadFonts() {
 			return
 		}
 		labelFace, err = newFace(medium, 38)
+		if err != nil {
+			fontErr = err
+			return
+		}
+		footerFace, err = newFace(medium, 32)
 		if err != nil {
 			fontErr = err
 			return
@@ -231,19 +237,24 @@ func RenderImage(s *Stats) ([]byte, error) {
 		{comma(s.ArtistCount), "artists"},
 	}
 
+	// 2x2 grid of stats plus a footer summary, filling most of the card
 	colW := (imgW - 100) / 2
-	row1Y, row2Y := 191, 428
+	colCenters := []int{50 + colW/2, 600 + colW/2}
+	row1Y, row2Y := 175, 400
 	const labelGap = 80
 
 	for i, st := range stats {
-		x := 50 + (i%2)*colW
+		x := colCenters[i%2]
 		y := row1Y
 		if i >= 2 {
 			y = row2Y
 		}
-		drawText(img, valueFace, st.value, x, y, rgb(0xf5, 0xec, 0xe3))
-		drawText(img, labelFace, st.label, x, y+labelGap, rgb(0xa6, 0x98, 0x90))
+		drawTextCentered(img, valueFace, st.value, x, y, rgb(0xf5, 0xec, 0xe3))
+		drawTextCentered(img, labelFace, st.label, x, y+labelGap, rgb(0xa6, 0x98, 0x90))
 	}
+
+	footer := fmt.Sprintf("%s minutes listened · %d days active", comma(s.MinutesListened), s.DaysActive)
+	drawTextCentered(img, footerFace, footer, imgW/2, 580, rgb(0xcf, 0xc3, 0xb7))
 
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, img); err != nil {
@@ -322,6 +333,11 @@ func drawText(img *image.RGBA, face font.Face, s string, x, y int, c rgba) {
 		Dot:  fixed.P(x, y),
 	}
 	d.DrawString(s)
+}
+
+func drawTextCentered(img *image.RGBA, face font.Face, s string, cx, y int, c rgba) {
+	w := font.MeasureString(face, s).Ceil()
+	drawText(img, face, s, cx-w/2, y, c)
 }
 
 func comma(n int64) string {
