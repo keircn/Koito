@@ -41,9 +41,8 @@ var (
 	fontOnce sync.Once
 	fontErr  error
 
-	valueFace  font.Face
-	labelFace  font.Face
-	footerFace font.Face
+	valueFace font.Face
+	labelFace font.Face
 )
 
 func loadFonts() {
@@ -58,17 +57,12 @@ func loadFonts() {
 			fontErr = err
 			return
 		}
-		valueFace, err = newFace(bold, 64)
+		valueFace, err = newFace(bold, 108)
 		if err != nil {
 			fontErr = err
 			return
 		}
-		labelFace, err = newFace(medium, 28)
-		if err != nil {
-			fontErr = err
-			return
-		}
-		footerFace, err = newFace(medium, 26)
+		labelFace, err = newFace(medium, 38)
 		if err != nil {
 			fontErr = err
 			return
@@ -236,15 +230,20 @@ func RenderImage(s *Stats) ([]byte, error) {
 		{comma(s.AlbumCount), "albums"},
 		{comma(s.ArtistCount), "artists"},
 	}
-	colW := (imgW - 160) / 4
-	for i, st := range stats {
-		x := 80 + i*colW
-		drawText(img, valueFace, st.value, x, 300, rgb(0xf5, 0xec, 0xe3))
-		drawText(img, labelFace, st.label, x, 380, rgb(0xa6, 0x98, 0x90))
-	}
 
-	footer := fmt.Sprintf("%s minutes listened  ·  %d days active", comma(s.MinutesListened), s.DaysActive)
-	drawText(img, footerFace, footer, 80, 470, rgb(0xcf, 0xc3, 0xb7))
+	colW := (imgW - 100) / 2
+	row1Y, row2Y := 191, 428
+	const labelGap = 80
+
+	for i, st := range stats {
+		x := 50 + (i%2)*colW
+		y := row1Y
+		if i >= 2 {
+			y = row2Y
+		}
+		drawText(img, valueFace, st.value, x, y, rgb(0xf5, 0xec, 0xe3))
+		drawText(img, labelFace, st.label, x, y+labelGap, rgb(0xa6, 0x98, 0x90))
+	}
 
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, img); err != nil {
