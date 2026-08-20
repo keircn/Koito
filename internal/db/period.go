@@ -32,7 +32,7 @@ func StartTimeFromPeriod(p Period) time.Time {
 	case "year":
 		return now.AddDate(-1, 0, 0)
 	case "all_time":
-		return time.Time{}
+		return time.Unix(0, 0)
 	default:
 		// default 1 day
 		return now.AddDate(0, 0, -1)

@@ -142,6 +142,9 @@ func bindRoutes(
 			AllowedHeaders: []string{"Content-Type", "Authorization"},
 		}))
 
+		r.Get("/", handlers.LbzInfoHandler())
+		r.Get("/info", handlers.LbzInfoHandler())
+
 		r.With(middleware.Authenticate(db, middleware.AuthModeAPIKey)).
 			Post("/submit-listens", handlers.LbzSubmitListenHandler(db, mbz))
 		r.With(middleware.Authenticate(db, middleware.AuthModeAPIKey)).

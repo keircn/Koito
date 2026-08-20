@@ -56,6 +56,7 @@ type config struct {
 	bindAddr   string
 	listenPort int
 	configDir  string
+	version    string
 	// baseUrl              string
 	sqliteEnabled          bool
 	databaseUrl            string
@@ -124,6 +125,7 @@ func loadConfig(getenv func(string) string, version string) (*config, error) {
 	}
 
 	cfg.bindAddr = getenv(BIND_ADDR_ENV)
+	cfg.version = version
 	var err error
 	cfg.listenPort, err = strconv.Atoi(getenv(LISTEN_PORT_ENV))
 	if err != nil {

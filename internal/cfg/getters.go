@@ -12,6 +12,12 @@ func UserAgent() string {
 	return globalConfig.userAgent
 }
 
+func Version() string {
+	lock.RLock()
+	defer lock.RUnlock()
+	return globalConfig.version
+}
+
 func ListenAddr() string {
 	lock.RLock()
 	defer lock.RUnlock()

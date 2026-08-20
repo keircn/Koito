@@ -100,9 +100,9 @@ func TimeframeToTimeRange(tf Timeframe) (t1, t2 time.Time) {
 	}
 
 	// ---------------------------------------------------------------------
-	// 5. Fallback: empty timeframe → zero values
+	// 5. Fallback: empty timeframe → all time
 	// ---------------------------------------------------------------------
-	return time.Time{}, time.Time{}
+	return time.Unix(0, 0), now
 }
 
 func startOfWeek(t time.Time) time.Time {
