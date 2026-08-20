@@ -316,7 +316,7 @@ func (s *Sqlite) GetArtistsForAlbum(ctx context.Context, id int32) ([]*models.Ar
 		JOIN artists_with_name awn ON awn.id = ar.artist_id
 		JOIN artists a ON a.id = ar.artist_id
 		WHERE ar.release_id = ?
-		ORDER BY ar.is_primary DESC, awn.name`,
+		ORDER BY ar.is_primary DESC, ar.rowid`,
 		id)
 	if err != nil {
 		return nil, fmt.Errorf("GetArtistsForAlbum: %w", err)
@@ -345,7 +345,7 @@ func (s *Sqlite) GetArtistsForTrack(ctx context.Context, id int32) ([]*models.Ar
 		JOIN artists_with_name awn ON awn.id = at2.artist_id
 		JOIN artists a ON a.id = at2.artist_id
 		WHERE at2.track_id = ?
-		ORDER BY at2.is_primary DESC, awn.name`,
+		ORDER BY at2.is_primary DESC, at2.rowid`,
 		id)
 	if err != nil {
 		return nil, fmt.Errorf("GetArtistsForTrack: %w", err)

@@ -71,7 +71,51 @@ func AssociateArtists(ctx context.Context, d db.ArtistStore, opts AssociateArtis
 		result = append(result, fallbackMatches...)
 	}
 
+	nameOrder := opts.ArtistNames
+	if len(nameOrder) == 0 {
+		nameOrder = ParseArtists(opts.ArtistName, opts.TrackTitle, cfg.ArtistSeparators())
+	}
+	result = reorderArtistsByName(result, nameOrder)
+
 	return result, nil
+}
+
+func reorderArtistsByName(artists []*models.Artist, names []string) []*models.Artist {
+	if len(names) == 0 {
+		return artists
+	}
+	used := make([]bool, len(artists))
+	ordered := make([]*models.Artist, 0, len(artists))
+	for _, name := range names {
+		for i, a := range artists {
+			if used[i] {
+				continue
+			}
+			if artistHasName(a, name) {
+				ordered = append(ordered, a)
+				used[i] = true
+				break
+			}
+		}
+	}
+	for i, a := range artists {
+		if !used[i] {
+			ordered = append(ordered, a)
+		}
+	}
+	return ordered
+}
+
+func artistHasName(a *models.Artist, name string) bool {
+	if strings.EqualFold(a.Name, name) {
+		return true
+	}
+	for _, alias := range a.Aliases {
+		if strings.EqualFold(alias, name) {
+			return true
+		}
+	}
+	return false
 }
 
 func matchArtistsByMBIDMappings(ctx context.Context, d db.ArtistStore, opts AssociateArtistsOpts) ([]*models.Artist, error) {
@@ -229,13 +273,16 @@ func resolveAliasOrCreateArtist(ctx context.Context, mbzID uuid.UUID, names []st
 	}
 
 	canonical := aliases[0]
-	for _, alias := range aliases {
-		for _, name := range names {
+	for _, name := range names {
+		for _, alias := range aliases {
 			if strings.EqualFold(alias, name) {
-				l.Debug().Msgf("Canonical name for artist is '%s'", alias)
-				canonical = alias
+				l.Debug().Msgf("Canonical name for artist is '%s'", name)
+				canonical = name
 				break
 			}
+		}
+		if canonical != aliases[0] {
+			break
 		}
 	}
 

@@ -116,7 +116,7 @@ func (s *Sqlite) artistsForTrack(ctx context.Context, trackID int32) ([]models.S
 		JOIN artists_with_name awn ON awn.id = at2.artist_id
 		JOIN artists a ON a.id = at2.artist_id
 		WHERE at2.track_id = ?
-		ORDER BY at2.is_primary DESC, awn.name`,
+		ORDER BY at2.is_primary DESC, at2.rowid`,
 		trackID,
 	)
 	if err != nil {
@@ -144,7 +144,7 @@ func (s *Sqlite) artistsForRelease(ctx context.Context, releaseID int32) ([]mode
 		JOIN artists_with_name awn ON awn.id = ar.artist_id
 		JOIN artists a ON a.id = ar.artist_id
 		WHERE ar.release_id = ?
-		ORDER BY ar.is_primary DESC, awn.name`,
+		ORDER BY ar.is_primary DESC, ar.rowid`,
 		releaseID,
 	)
 	if err != nil {
@@ -172,7 +172,7 @@ func (s *Sqlite) artistsWithAliasesForTrack(ctx context.Context, trackID int32) 
 		JOIN artists_with_name awn ON awn.id = at2.artist_id
 		JOIN artists a ON a.id = at2.artist_id
 		WHERE at2.track_id = ?
-		ORDER BY at2.is_primary DESC, awn.name`,
+		ORDER BY at2.is_primary DESC, at2.rowid`,
 		trackID,
 	)
 	if err != nil {
