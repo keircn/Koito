@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"bytes"
 	"mime"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/gabehf/koito/engine/middleware"
 	"github.com/gabehf/koito/internal/cfg"
 	"github.com/gabehf/koito/internal/db"
+	"github.com/gabehf/koito/internal/og"
 	"github.com/gabehf/koito/internal/utils"
 	mbz "github.com/gabehf/koito/internal/mbz"
 	"github.com/go-chi/chi/v5"
@@ -37,6 +39,8 @@ func bindRoutes(
 
 	r.With(chimiddleware.RequestSize(5<<20)).
 		Get("/image/{image_id}/{filename}", handlers.ImageHandler(db))
+
+	r.Get("/og-image.png", og.ImageHandler(db))
 
 	r.Route("/apis/web/v1", func(r chi.Router) {
 		r.Get("/config", handlers.GetCfgHandler())
@@ -153,15 +157,18 @@ func bindRoutes(
 
 	// serve react client
 	workDir, _ := os.Getwd()
-	filesDir := http.Dir(filepath.Join(workDir, "client/build/client"))
-	fileServer(r, "/", filesDir)
+	clientDir := filepath.Join(workDir, "client/build/client")
+	filesDir := http.Dir(clientDir)
+	fileServer(r, "/", filesDir, clientDir, func(r *http.Request) (string, error) {
+		return og.MetaTags(r.Context(), db, pageURL(r))
+	})
 
 	// serve client public files
 	filesDir = http.Dir(filepath.Join(workDir, "client/public"))
 	publicServer(r, "/public", filesDir)
 }
 
-func fileServer(r chi.Router, path string, root http.FileSystem) {
+func fileServer(r chi.Router, path string, root http.FileSystem, clientDir string, ogMeta func(r *http.Request) (string, error)) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit any URL parameters.")
 	}
@@ -169,17 +176,36 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 	fs := http.FileServer(root)
 
 	r.Get(path+"*", func(w http.ResponseWriter, r *http.Request) {
-		filePath := filepath.Join("client/build/client", strings.TrimPrefix(r.URL.Path, path))
+		filePath := filepath.Join(clientDir, strings.TrimPrefix(r.URL.Path, path))
 
-		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		statPath := strings.TrimSuffix(filePath, "/")
+		if statPath == "" {
+			statPath = clientDir
+		}
+
+		info, err := os.Stat(statPath)
+
+		// Unknown route: serve the SPA shell, but never for /apis/*
+		if err != nil {
+			if !os.IsNotExist(err) {
+				fs.ServeHTTP(w, r)
+				return
+			}
 			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-			// Never serve the SPA for unknown API routes; report a JSON
-			// 404 instead so API consumers don't receive HTML with 200 OK.
 			if strings.HasPrefix(r.URL.Path, "/apis") {
 				utils.WriteError(w, "not found", http.StatusNotFound)
 				return
 			}
-			http.ServeFile(w, r, filepath.Join("client/build/client", "index.html"))
+			meta, _ := ogMeta(r)
+			serveIndex(w, r, clientDir, meta)
+			return
+		}
+
+		// Directory: serve the SPA shell (root and client routes)
+		if info.IsDir() {
+			w.Header().Set("Cache-Control", "no-cache")
+			meta, _ := ogMeta(r)
+			serveIndex(w, r, clientDir, meta)
 			return
 		}
 
@@ -207,6 +233,47 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 
 		fs.ServeHTTP(w, r)
 	})
+}
+
+func serveIndex(w http.ResponseWriter, r *http.Request, clientDir, meta string) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache")
+
+	indexPath := filepath.Join(clientDir, "index.html")
+	indexHTML, err := os.ReadFile(indexPath)
+	if err != nil {
+		http.ServeFile(w, r, indexPath)
+		return
+	}
+	if meta != "" {
+		indexHTML = injectMeta(indexHTML, meta)
+	}
+	w.Write(indexHTML)
+}
+
+func injectMeta(html []byte, meta string) []byte {
+	const headClose = "</head>"
+	if idx := bytes.LastIndex(html, []byte(headClose)); idx != -1 {
+		out := make([]byte, 0, len(html)+len(meta)+2)
+		out = append(out, html[:idx]...)
+		out = append(out, '\n', '\t')
+		out = append(out, meta...)
+		out = append(out, html[idx:]...)
+		return out
+	}
+	out := make([]byte, 0, len(html)+len(meta)+2)
+	out = append(out, meta...)
+	out = append(out, '\n')
+	out = append(out, html...)
+	return out
+}
+
+func pageURL(r *http.Request) string {
+	scheme := "http"
+	if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
+		scheme = "https"
+	}
+	return scheme + "://" + r.Host + r.URL.Path
 }
 
 func publicServer(r chi.Router, path string, root http.FileSystem) {

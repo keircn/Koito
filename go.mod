@@ -14,6 +14,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sync v0.20.0
 	golang.org/x/time v0.11.0
+	golang.org/x/image v0.33.0
 )
 
 require (
@@ -21,7 +22,6 @@ require (
 	github.com/gosimple/unidecode v1.0.1
 	github.com/lithammer/fuzzysearch v1.1.8
 	golang.org/x/crypto v0.38.0
-	golang.org/x/image v0.33.0
 	modernc.org/sqlite v1.49.1
 )
 
