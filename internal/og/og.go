@@ -175,11 +175,7 @@ func MetaTags(ctx context.Context, store statsStore, pageURL string) (string, er
 		return "", err
 	}
 
-	title := fmt.Sprintf("Koito — %s listens", comma(s.ListenCount))
-	desc := fmt.Sprintf(
-		"%s tracks · %s albums · %s artists · %s minutes listened",
-		comma(s.TrackCount), comma(s.AlbumCount), comma(s.ArtistCount), comma(s.MinutesListened),
-	)
+	title := fmt.Sprintf("Koito - %s listens", comma(s.ListenCount))
 	imgURL := assetURL(pageURL, "/og-image.png")
 
 	var b strings.Builder
@@ -190,12 +186,10 @@ func MetaTags(ctx context.Context, store statsStore, pageURL string) (string, er
 	writeTag("<meta property", "og:type", "website")
 	writeTag("<meta property", "og:site_name", "Koito")
 	writeTag("<meta property", "og:title", title)
-	writeTag("<meta property", "og:description", desc)
 	writeTag("<meta property", "og:url", pageURL)
 	writeTag("<meta property", "og:image", imgURL)
 	writeTag("<meta name", "twitter:card", "summary_large_image")
 	writeTag("<meta name", "twitter:title", title)
-	writeTag("<meta name", "twitter:description", desc)
 	writeTag("<meta name", "twitter:image", imgURL)
 
 	return b.String(), nil
