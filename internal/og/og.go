@@ -240,7 +240,6 @@ func RenderImage(s *Stats) ([]byte, error) {
 	fillCircle(img, 1130, 190, 90, rgb(0xf0, 0xc8, 0x4a).blend(25))
 
 	drawText(img, titleFace, "Koito", 80, 150, rgb(0xf5, 0xec, 0xe3))
-	drawRect(img, 84, 172, 130, 5, rgb(0xe5, 0x84, 0x6a))
 	drawText(img, subFace, "Your personal listening history", 80, 235, rgb(0xe5, 0x84, 0x6a))
 
 	stats := []struct {
