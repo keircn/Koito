@@ -13,6 +13,7 @@ import (
 	"github.com/gabehf/koito/engine/middleware"
 	"github.com/gabehf/koito/internal/cfg"
 	"github.com/gabehf/koito/internal/db"
+	"github.com/gabehf/koito/internal/utils"
 	mbz "github.com/gabehf/koito/internal/mbz"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
@@ -169,6 +170,12 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 
 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
 			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			// Never serve the SPA for unknown API routes; report a JSON
+			// 404 instead so API consumers don't receive HTML with 200 OK.
+			if strings.HasPrefix(r.URL.Path, "/apis") {
+				utils.WriteError(w, "not found", http.StatusNotFound)
+				return
+			}
 			http.ServeFile(w, r, filepath.Join("client/build/client", "index.html"))
 			return
 		}

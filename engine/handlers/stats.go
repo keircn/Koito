@@ -111,10 +111,14 @@ func StatsHandler(store statsStore) http.HandlerFunc {
 			ArtistCount:     artists,
 			MinutesListened: timeListenedS / 60,
 			DaysActive:      activeDays,
-			AvgDailyPlays:   float32(listens) / float32(activeDays),
-			TracksPerArtist: float32(tracks) / float32(artists),
-			AlbumsPerArtist: float32(albums) / float32(artists),
 			LongestStreak:   longestStreak,
+		}
+		if activeDays > 0 {
+			resp.AvgDailyPlays = float32(listens) / float32(activeDays)
+		}
+		if artists > 0 {
+			resp.TracksPerArtist = float32(tracks) / float32(artists)
+			resp.AlbumsPerArtist = float32(albums) / float32(artists)
 		}
 
 		utils.WriteJSON(w, http.StatusOK, resp)
