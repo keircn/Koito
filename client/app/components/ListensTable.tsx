@@ -57,7 +57,7 @@ export default function ListensTable({
                 </Link>
               </div>
             </td>
-            <td className={timeColClasses}>
+            <td className={`${timeColClasses} whitespace-nowrap`}>
               <div className="flex items-center justify-end gap-2 text-end">
                 <div className="h-1.5 w-1.5 rounded-full bg-(--color-primary)" />
                 {"Now Playing"}

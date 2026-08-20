@@ -41,8 +41,6 @@ var (
 	fontOnce sync.Once
 	fontErr  error
 
-	titleFace  font.Face
-	subFace    font.Face
 	valueFace  font.Face
 	labelFace  font.Face
 	footerFace font.Face
@@ -56,16 +54,6 @@ func loadFonts() {
 			return
 		}
 		medium, err := parseFont("fonts/LeagueSpartan-Medium.ttf")
-		if err != nil {
-			fontErr = err
-			return
-		}
-		titleFace, err = newFace(bold, 108)
-		if err != nil {
-			fontErr = err
-			return
-		}
-		subFace, err = newFace(medium, 32)
 		if err != nil {
 			fontErr = err
 			return
@@ -239,9 +227,6 @@ func RenderImage(s *Stats) ([]byte, error) {
 	fillCircle(img, 980, 40, 240, rgb(0xe5, 0x84, 0x6a).blend(30))
 	fillCircle(img, 1130, 190, 90, rgb(0xf0, 0xc8, 0x4a).blend(25))
 
-	drawText(img, titleFace, "Koito", 80, 150, rgb(0xf5, 0xec, 0xe3))
-	drawText(img, subFace, "Your personal listening history", 80, 235, rgb(0xe5, 0x84, 0x6a))
-
 	stats := []struct {
 		value string
 		label string
@@ -254,12 +239,12 @@ func RenderImage(s *Stats) ([]byte, error) {
 	colW := (imgW - 160) / 4
 	for i, st := range stats {
 		x := 80 + i*colW
-		drawText(img, valueFace, st.value, x, 430, rgb(0xf5, 0xec, 0xe3))
-		drawText(img, labelFace, st.label, x, 498, rgb(0xa6, 0x98, 0x90))
+		drawText(img, valueFace, st.value, x, 300, rgb(0xf5, 0xec, 0xe3))
+		drawText(img, labelFace, st.label, x, 380, rgb(0xa6, 0x98, 0x90))
 	}
 
 	footer := fmt.Sprintf("%s minutes listened  ·  %d days active", comma(s.MinutesListened), s.DaysActive)
-	drawText(img, footerFace, footer, 80, 578, rgb(0xcf, 0xc3, 0xb7))
+	drawText(img, footerFace, footer, 80, 470, rgb(0xcf, 0xc3, 0xb7))
 
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, img); err != nil {
@@ -308,17 +293,6 @@ func fillCircle(img *image.RGBA, cx, cy, r int, c rgba) {
 			if dx*dx+dy*dy <= r*r {
 				blendOver(img, x, y, c)
 			}
-		}
-	}
-}
-
-func drawRect(img *image.RGBA, x, y, w, h int, c rgba) {
-	for yy := y; yy < y+h; yy++ {
-		for xx := x; xx < x+w; xx++ {
-			if xx < 0 || yy < 0 || xx >= img.Bounds().Dx() || yy >= img.Bounds().Dy() {
-				continue
-			}
-			img.SetRGBA(xx, yy, color.RGBA(c))
 		}
 	}
 }

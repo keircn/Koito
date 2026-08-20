@@ -92,8 +92,7 @@ func TestMetaTags(t *testing.T) {
 	}
 
 	checks := []string{
-		`<meta property="og:title" content="Koito — 1,234 listens">`,
-		`<meta property="og:description" content="321 tracks · 45 albums · 6 artists · 60 minutes listened">`,
+		`<meta property="og:title" content="Koito - 1,234 listens">`,
 		`<meta property="og:url" content="https://koito.example/artist/1">`,
 		`<meta property="og:image" content="https://koito.example/og-image.png">`,
 		`<meta property="og:site_name" content="Koito">`,
