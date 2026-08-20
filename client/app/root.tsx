@@ -56,18 +56,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link
-          rel="icon"
-          type="image/png"
-          href="/favicon-96x96.png"
-          sizes="96x96"
-        />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" href="/key-icon.png" />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href="/apple-touch-icon.png"
+          href="/key-icon.png"
         />
         <meta name="apple-mobile-web-app-title" content="Koito" />
         <link rel="manifest" href="/site.webmanifest" />
@@ -76,6 +69,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen">
         {children}
+        <a
+          href="https://keirn.net"
+          aria-label="Visit keirn.net"
+          className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full bg-(--color-primary) px-4 py-2 font-medium text-(--color-bg) shadow-lg transition-opacity hover:opacity-90"
+        >
+          <svg
+            className="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+          keirn.net
+        </a>
         <ScrollRestoration />
         <Scripts />
       </body>
